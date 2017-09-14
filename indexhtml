@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>vue指令使用示例</title>
+	<link href="http://cdn.bootcss.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+	<link href="http://cdn.bootcss.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+	<script src="https://unpkg.com/vue"></script>
+	<style>
+		*{padding: 0;margin: 0;font-style: "宋体";}
+		body{background-color: #f0f0f0;}
+		.page-top{
+			width: 100%;
+			height: 50px;
+			background-color: #ffc234;
+		}
+		.page-content{
+			line-height: 50px;
+			text-align: center;
+			vertical-align: middle;
+		}
+		.main{
+			width: 500px;
+			height: auto;
+			margin: 0 auto;
+		}
+		.big-title{
+			display: block;
+			font-family: "宋体";
+			width: auto;
+			height: 45px;
+			vertical-align: middle;
+			line-height: 45px;
+		}
+		.task-input{
+			display: block;
+			width: 100%;
+			height: 25px;
+			border-radius: 10px;
+			line-height: 25px;
+			vertical-align: middle;
+		}
+		.task-count{
+			display: block;
+			width: 500px;
+			height: 27px;
+			line-height: 27px;
+			vertical-align: middle;
+		}
+		.task-count li:nth-child(1){
+			float: left;
+		}
+		.task-count li:nth-child(2){
+			text-align: right;
+			right: 0px;
+		}
+		.tasks{
+			width: 100%;
+			height: auto;
+			margin-left: 0px;
+		}
+		.no-task-tip{
+			display: block;
+			height: 25px;
+			width: auto;
+			line-height: 25px;
+			vertical-align: middle;
+		}
+		.action{
+			display: block;
+			font-family: "楷体";
+			width: auto;
+			height: 25px;
+			right: 0px;
+			margin-left: 170px;
+			right: 0px;
+			margin-top: 8px;
+		}
+		.action a{
+			display: block;
+			float: left;
+			width: 100px;
+			height: 25px;
+			text-decoration: none;
+			background-color: #fcfcfc;
+			border:1px solid #ffad86;
+			opacity: 0.8;
+			border-radius: 10px;
+			margin-left: 3px;
+			text-align: center;
+			vertical-align: middle;
+			right: 0px;
+		}
+		.view{
+			width: 100%;
+			height: 30px;
+			background: #fff;
+			vertical-align: middle;
+			line-height: 30px;
+			opacity: 0.6;
+			border-radius: 10px;
+			margin-bottom: 6px;
+		}
+		.toggle{
+			display: inline-block;
+			width: 30px;
+			height: 30px;
+			float: left;
+			margin-left: 10px;
+			border-radius: 50%;
+		}
+		label{
+			display: block;
+			height: 30px;
+			width: 430px;
+			line-height: 30px;
+			vertical-align: middle;
+			left: 0px;
+			float: left;
+		}
+		.complete{
+			display: block;
+			background-color: #8e8e8e;
+			border-radius: 10px;
+		}
+		.completed{
+			display: block;
+			/*background:#adadad;*/
+			text-decoration: line-through;
+			text-decoration-color: #000;
+			height: 5px;
+		}
+		.destroy{
+			display: block;
+			position: absolute;
+			width: 22px;
+			height: 22px;
+			border-radius: 50%;
+			border:none;
+			opacity: 1;
+			margin-top: 4px;
+			margin-left: 475px;
+		}
+		.edit{
+			display: none;
+			/*display: block;*/
+			width: auto;
+			height: auto;
+			margin-top: -50px;
+		}
+		ul li{
+			list-style: none;
+		}
+	</style>
+	<!-- <script src="./vue.js"></script> -->
+</head>
+<body>
+<div>
+	<div class="page-top">
+		<div class="page-content">
+			<h2>任务计划列表</h2>
+		</div>
+	</div>
+	<div class="main">
+		<h3 class="big-title">添加任务：</h3>
+		<input type="text" placeholder="例如：吃饭睡觉打豆豆：    提示：+回车即可添加任务" class="task-input" v-on:keyup.13 ="addTodo" v-model="todo">
+		<ul class="task-count" v-show="list.length">
+			<li>{{ noCheckeLength }}个任务未完成</li>
+			<li class="action">
+				<a href="#all" class="active">所有任务</a>
+				<a href="#unfinished">未完成的任务</a>
+				<a href="#finished">完成的任务</a>
+			</li>
+		</ul>
+		<h3 class="big-title">任务列表：</h3>
+		<div class="tasks">
+			<span class="no-task-tip" v-show="!list.length">还没有添加任何任务</span>
+			<ul class="todo-list">
+				<li class="todo" :class="{complete:item.isChecked,editing:item === edtorTodos}" v-for="item in filteredList">
+					<div class="view">
+						<input type="checkbox" class="toggle" v-model="item.isChecked">
+						<label @dbclick="edtorTodo(item)" :class="{completed:item.isChecked}">{{ item.title }}</label>
+						<button class="destroy button button-large button-plain button-border button-square" @click="deleteTodo(item)"><i class="fa fa-trash-o"></i></button>
+					</div>
+					<input type="text" class="edit" v-model="item.title" v-focus = "edtorTodos === item" @blur="edtorTodoed(item)" @keyup.13="edtorTodoed(todo)" @keyup.esc="cancelTodo(todo)">
+				</li>
+				<!-- <li class="todo">
+					<div class="view">
+						<input type="checkbox" class="toggle">
+						<label>吃饭睡觉打豆豆</label>
+						<button class="destroy"></button>
+					</div>
+					<input type="text" class="edit">
+				</li> -->
+			</ul>
+		</div>
+	</div>
+</div>
+	<script>
+		//存取localStorage中数据
+		var store = {
+			save(key,value){
+				localStorage.setItem(key,JSON.stringify(value));
+			},
+			fetch(key){
+				return JSON.parse(localStorage.getItem(key)) || [];
+			}
+		};
+
+		var list = store.fetch("Learn-Vuejs");
+
+		//过滤的时候有三种情况 all finished unfinished
+		var filter = {
+			all:function(){
+				return list;
+			},
+			finished:function(){
+				return list.filter(function(item){
+					return item.isChecked;
+				})
+			},
+			unfinished:function(){
+				return !list.isChecked;
+			}
+		};
+
+		var vm = new Vue({
+			el:".main",
+			data:{
+				list:list,
+				todo:"",
+				edtorTodos:"", //记录正在编辑的数据
+				beforTitle:"", //记录编辑之前的任务的记录
+				visibility:"all" //通过该属性值的变化对数据进行筛选
+			},
+			watch:{
+				// list:function(){
+				// 	//监控list数据属性，当list属性对应的值放生变化执行函数
+				// 	store.save("Learn-Vuejs",this.list);
+				// }
+				list:{
+					handler:function(){
+						store.save("miaov-new-class",this.list);
+					},
+					deep:true
+				}
+			},
+			computed:{
+				noCheckeLength:function(){
+					return this.list.filter(function(item){
+						return !item.isChecked
+					}).length
+				},
+				filteredList:function(){
+					//找到了过滤函数，就返回过滤后的数据；如果没有，则返回所有数据
+					return filter[this.visibility] ? filter[this.visibility](list) : list;
+				}
+			},
+			methods:{
+				addTodo(ev){ //添加任务
+					//向list中添加一项任务
+					/*
+						{
+							title:
+						}
+					*/
+					//事件处理函数中的this指向的是当前根实例
+					this.list.push({
+						title:this.todo,
+						isChecked:false
+					});
+
+					this.todo = '';
+				},
+				deleteTodo(todo){
+					var index = this.list.indexOf(todo);
+					this.list.splice(index,1);
+				},
+				edtorTodo(todo){
+					// console.log(todo);
+					//编辑任务的时候，记录编辑的这条任务的title，方便在取消编辑的时候重新给之前的title
+					this.beforTitle = todo.title;
+					this.edtorTodos = todo;
+				},
+				edtorTodoed(todo){ //编辑任务完成
+					edtorTodos = "";
+				},
+				cancelTodo(todo){ //取消编辑
+					//取消当前操作
+					todo.title = this.beforTitle;
+					this.beforTitle = "";
+					//显示div，隐藏input
+					this.edtorTodos = "";
+				}
+			},
+			directives:{ //自定义指令
+				"focus":{
+					update(el,binding){
+						// console.log(el);
+						// console.log(binding);
+						if(binding.value){
+							el.focus();
+						}
+					}
+				}
+			}
+		});
+		function watchHashChange(){
+			var hash = window.location.hash.slice(1);
+			// console.log(hash);
+			vm.visibility = hash;
+		}
+		watchHashChange();
+		window.addEventListener("haschange",watchHashChange);
+	</script>
+</body>
+</html>
