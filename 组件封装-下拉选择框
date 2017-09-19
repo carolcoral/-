@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>封装组件-下拉菜单</title>
+	<style>
+		*{margin: 0;padding: 0;}
+		#app{
+			width: 600px;
+			height: auto;
+			margin: 0 auto;
+			/*background-image: url("http://www.51edu.com/ueditor2014/php/upload/image/20150216/1424069121411681.png");*/
+			background-color: #ffc321;
+			background-repeat: no-repeat;
+			margin-top: 20px;
+			border-radius: 20px;
+		}
+		h2{
+			text-align: center;
+			vertical-align: middle;
+		}
+		ul li{
+			list-style: none;
+			margin-left: 20px;
+		}
+		.warp{
+			width: 180px;
+			height: auto;
+			margin: 0 auto;
+			line-height: 35px;
+			vertical-align: middle;
+			text-decoration: none;
+			font-family: "微软雅黑";
+			font-size: 14px;
+			color: #750000;
+		}
+		.searchIpt{
+			border: 2px dashed #d94600;
+			border-radius: 6px;
+			background-color: #fff;
+		}
+		.keyWord{
+			display: block;
+			width: 120px;
+			height: 25px;
+			border-radius: 8px;
+			float: left;
+		}
+	</style>
+	<script src="./vue.js"></script>
+</head>
+<body>
+<!-- 组件的基本组成：
+	样式结构
+	行为逻辑
+	数据 -->
+
+
+	<div id="app">
+		<h2>自定义的下拉菜单</h2>
+		<custom-select bt-Value="查询" v-bind:list="list1"></custom-select>
+		<br>
+		<h2>自定义的下拉菜单2</h2>
+		<!-- <table>
+			//使用is属性设置自定义组件
+			<tr is="custom-select"></tr>
+		</table> -->
+		<custom-select bt-Value="搜索" v-bind:list="list2"></custom-select>
+	</div>
+	<script>
+		//注册组件
+		Vue.component("custom-select",{
+			data:function(){   //data中只能设置函数式
+				return {
+					selectShow:{
+						type:Boolean,
+						default:true
+					},
+					val:""
+				};
+			},
+			props:["btValue","list"], //自定义参数设置函数
+			//设置模版格式
+			template:`
+			<section class='warp'>
+				<div class='searchIpt clearFix'>
+					<div class='clearFix'>
+						<input 
+							type='text' 
+							class='keyWord' 
+							:value='val' 
+							@click='selectShow=!selectShow'>
+						<input type='button' v-bind:value='btValue'>
+						<span></span>
+					</div>
+					<custom-list 
+						v-show='selectShow' 
+						:list='list'
+						v-on:receive='changeValueHandle'
+					></custom-list>
+				</div>
+			</section>`,
+			methods:{
+				changeValueHandle(value){
+					// alert(value);
+					// console.log(value);
+					this.val = value;
+					// console.log(this.val);
+				}
+			}
+		})
+
+		Vue.component("custom-list",{
+			props:['list'],
+			template:`
+					<ul class='list' v-show='selectShow'>
+						<li v-for='item of list' @click="selectValueHandle(item)">{{item}}</li>
+					</ul>`,
+			methods:{
+				selectValueHandle:function(item){
+					//在子组件中点击交互
+					//告知父级，改变val值，需要触发一个自定义事件
+					this.$emit("receive",item);
+
+				}
+			}
+		})
+
+		new Vue({
+			el:"#app",
+			data:{
+				list1:["北京",'上海','成都','杭州','重庆'],
+				list2:['170201','170202','170203','170204']
+			}
+		})
+
+	</script>
+
+
+</body>
+</html>
