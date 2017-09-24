@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>原生canvas开发验证码</title>
+	<link rel="stylesheet" href="">
+	<style>
+		*{margin: 0;padding: 0;}
+		body{
+			width: 200px;
+			height: 200px;
+			margin: 0 auto;
+			margin-top: 40px;
+		}
+		a{
+			display: block;
+			text-decoration: none;
+			text-align: center;
+			vertical-align: middle;
+		}
+	</style>
+</head>
+<body>
+	<script>
+		function randomColor(){
+			var r = Math.floor(Math.random()*255);
+			var g = Math.floor(Math.random()*255);
+			var b = Math.floor(Math.random()*255);
+			return "rgb("+r+","+g+","+b+")"
+			// return `rgb(r,g,b)`;
+		}
+		window.onload = function(){
+			// alert("hh");
+			draw();
+			document.getElementById("bgimg").onclik = function(){
+				draw();
+			}
+		}
+		function draw(){
+			var Canvas = document.getElementById("Canvas");//获取到canvas的对象
+			var context = Canvas.getContext('2d');//获取到canvas画图环境
+			var width = Canvas.width = 200;//画布的长度
+			var height = Canvas.height = 60;//画布的高度
+			context.strokeRect(0,0,width,height);//绘制画布
+			var sData = "A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z,1,2,3,4,5,6,7,8,9,0";//数据
+			var pData = sData.split(",");//生成数组
+			var lData = pData.length;//获取数组的长度
+			for (var i = 0; i < 4; i++) {
+				var j = Math.floor(Math.random()*lData);//获取到随机的索引值
+				var txt = pData[j];//得到随机的值
+				console.log(txt);
+				var x = 20+i*20;//内容在画布上的X坐标
+				var y = 20+Math.random()*10;//内容在画布上的Y坐标
+				var deg = Math.random()*360*Math.PI/180;
+				context.font = "blod 56px 宋体";//设置内容的文本样式
+
+				context.translate(x,y);//移动并设置坐标原点为x,y
+				context.rotate(deg);
+				context.fillStyle = randomColor();
+				context.fillText(txt,0,0);
+				context.rotate(-deg);
+				context.translate(-x,-y);
+			}
+			//绘制干扰线
+			for(var i = 0;i<6;i++){
+				context.strokeStyle = randomColor();
+				context.beginPath();
+				context.moveTo(Math.random()*width,Math.random()*height);
+				context.lineTo(Math.random()*width,Math.random()*height);
+				context.stroke();
+			}
+			// 绘制干扰点
+			for(var i = 0;i<20;i++){
+				context.strokeStyle = randomColor();
+				context.beginPath();
+				context.arc(Math.random()*width,Math.random()*height,1,0,2*Math.PI);//canvas的内置属性arc画圆（X坐标，Y坐标，半径，起始角，结束角）
+				context.stroke();
+			}
+		}
+	</script>
+	<canvas id="Canvas"></canvas>
+	<a href="" id="bgimg">点击切换</a>
+</body>
+</html>
